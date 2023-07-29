@@ -1,4 +1,4 @@
-const customers = [
+export const customers = [
   {
     name: "Lilah Goulding",
     id: "BGzHhjnE8",

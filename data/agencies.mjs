@@ -1,4 +1,4 @@
-const agencies = [
+export const agencies = [
   {
     agencyName: "Best Deal",
     cash: 1245000,

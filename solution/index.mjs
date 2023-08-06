@@ -1,229 +1,194 @@
 import { agencies } from "../data/agencies.mjs";
 import { customers } from "../data/customers.mjs";
-import { taxesAuthority } from "../data/taxesAuthority.mjs";
 
-// getAgencyByName
-// @param {string} - name
-// @return {Object} - agency object
-const getAgencyByName = function (name) {
-  return agencies.find((agency) => agency.agencyName === name);
+const CarAgencyManager = {
+  agencies,
+
+  // Search for a car agency by its name or ID.
+  // @param {string} idOrName - ID or name of the agency
+  // @return {object} - agency object if found, otherwise null
+  searchAgency: function (idOrName) {
+    return (
+      agencies.find(
+        (agency) =>
+          agency.agencyId === idOrName || agency.agencyName === idOrName
+      ) || null
+    );
+  },
+
+  // Retrieve all agencies' names.
+  // @return {string[]} - Array of agency names
+  getAllAgencies: function () {
+    return agencies.map((agency) => agency.agencyName);
+  },
+
+  // Add a new car to an agency's inventory.
+  // @param {string} agencyId - The ID of the agency
+  // @param {object} car - The car object to be added
+  // @return {boolean} - true if added successfully, false otherwise
+  addCarToAgency: function (agencyId, car) {
+    const agency = agencies.find((agency) => agency.agencyId === agencyId);
+    if (!agency) {
+      return false;
+    }
+    const existingBrand = agency.cars.find((c) => c.brand === car.brand);
+    if (!existingBrand) {
+      const newBrand = {
+        brand: car.brand,
+        models: [car],
+      };
+      agency.cars.push(newBrand);
+    } else {
+      existingBrand.models.push(car);
+    }
+    return true;
+  },
+
+  // Remove a car from an agency's inventory.
+  // @param {string} agencyId - The ID of the agency
+  // @param {string} carId - The ID of the car to be removed
+  // @return {boolean} - true if removed successfully, false otherwise
+  removeCarFromAgency: function (agencyId, carId) {
+    const agency = agencies.find((agency) => agency.agencyId === agencyId);
+    if (!agency) {
+      return false;
+    }
+    let carToRemove;
+    for (let brand of agency.cars) {
+      for (let car of brand.models) {
+        if (car.carNumber === carId) {
+          carToRemove = car;
+          if (!carToRemove) {
+            return false;
+          }
+          brand.models.splice(brand.models.indexOf(car), 1);
+        }
+      }
+    }
+    return true;
+  },
+
+  // Change the cash or credit of an agency.
+  // @param {string} agencyId - The ID of the agency
+  // @param {number} cashOrCredit - The amount of cash or credit to be updated
+  // @return {boolean} - true if updated successfully, false otherwise
+  changeAgencyCashOrCredit: function (agencyId, cashOrCredit) {
+
+  },
+
+  // Update the price of a specific car in an agency.
+  // @param {string} agencyId - The ID of the agency
+  // @param {string} carId - The ID of the car
+  // @param {number} newPrice - The new price of the car
+  // @return {boolean} - true if updated successfully, false otherwise
+  updateCarPrice: function (agencyId, carId, newPrice) {
+    
+  },
+
+  // Calculate and return the total revenue for a specific agency.
+  // @param {string} agencyId - The ID of the agency
+  // @return {number} - The total revenue of the agency
+  getTotalAgencyRevenue: function (agencyId) {
+    const agency = agencies.find((agency) => agency.agencyId === agencyId);
+    return agency.cash + agency.credit;
+  },
+
+  // Transfer a car from one agency to another.
+  // @param {string} fromAgencyId - The ID of the agency from where the car will be transferred
+  // @param {string} toAgencyId - The ID of the agency to where the car will be transferred
+  // @param {string} carId - The ID of the car to be transferred
+  // @return {boolean} - true if transferred successfully, false otherwise
+  transferCarBetweenAgencies: function (fromAgencyId, toAgencyId, carId) {},
 };
 
-// console.log(getAgencyByName("Car Werks"));
-
-// getAgencyIdByName
-// @param {String} - name
-// @return {String} - agencyId
-const getAgencyIdByName = function (name) {
-  return agencies.find((agency) => agency.agencyName === name).agencyId;
-};
-
-// console.log(getAgencyIdByName("The Auto World"));
-
-// getAllAgenciesName
-// @return {string[]} - agenciesNameArr - Array of all agencies name
-const getAllAgenciesName = function (agencies) {
-  return agencies.map(agency => agency.agencyName)
-};
-
-// console.log(getAllAgenciesName(agencies));
-
-// getAllCarToBuy
-// @return {object[]} - allCarsToBuy - arrays of all cars objects
-const getAllCarToBuy = function (agencies) {
-  return agencies.map(agency => agency.cars);
-};
-
-// console.log(getAllCarToBuy(agencies));
-
-// getAllCarToBuyByAgencyId
-// @param {string} - id of agency
-// @return {object[]} - carsArray - arrays of all models objects of specific agency
-const getAllCarToBuyByAgencyId = function (agencyId) {
-  return agencies.find(agency => agency.agencyId === agencyId).cars
-  .map(car => car.models);
-};
-// *************************************
-// console.log(getAllCarToBuyByAgencyId('Plyq5M5AZ'));
-
-// getAllBrandsToBuyAgencyId
-// @param {string} - agencyId -  id of agency
-// @return {string[]} - arrOfBrands - arrays of all brands name in specific agency
-const getAllBrandsToBuyAgencyId = function (agencyId) {
-  return agencies.find(agency => agency.agencyId === agencyId).cars
-  .map(car => car.brand);
-};
-
-// console.log(getAllBrandsToBuyAgencyId('Plyq5M5AZ'));
-
-// getCustomerByName
-// @param {string} - name
-// @return {Object} - customer
-const getCustomerByName = (name) => {
-  return customers.find(customer => customer.name === name);
-};
-
-// console.log(getCustomerByName("Lana Edge"));
-
-// getCustomerIdByName
-// @param {name}
-// @return {String} - customerId - The customer id
-const getCustomerIdByName = function (name) {
-  return customers.find(customer => customer.name === name).id;
-};
-
-// console.log(getCustomerIdByName("Lilah Goulding"));
-
-// getAllCustomersNames
-// @return {string[]} - customersNameArr -  Array of all customers name
-const getAllCustomersNames = function (customers) {
-  return customers.map(customer => customer.name)
-};
-
-// console.log(getAllCustomersNames(customers));
-
-// getAllCustomerCars
-// @param {id} - costumerId - costumer id
-// @return {object[]} - customerCarsArr -  Array of all customer cars object
-const getAllCustomerCars = function (id) {
-  return customers.find(customer => customer.id === id).cars;
-};
-
-// console.log(getAllCustomerCars('2RprZ1dbL'));
-
-// getCustomerCash
-// @param {id} - costumerId - costumer id
-// @return {number} - CustomerCash
-const getCustomerCash = function (id) {
-  return customers.find(customer => customer.id === id).cash;
-};
-
-// console.log(getCustomerCash('2RprZ1dbL'));
-
-// setPropertyBrandToAllCars
-// set all cars model object the current brand
-const setPropertyBrandToAllCars = function () {
-  
-};
-
-// setNewCarToAgency
-// @param {string} - id of agency
-// @param {object} - carObject
-const setNewCarToAgency = function (agencyId, carObject) {};
-
-// deleteCarFromAgency
-// @param {string} - id of agency
-// @param {string} -  Car id
-const deleteCarFromAgency = function (marketObj, agencyId, carId) {};
-
-// decrementOrIncrementCashOfAgency
-// @param {string} - agencyId
-// @param {number} - amount - negative or positive amount
-// @return {number} - agencyCash
-const decrementOrIncrementCashOfAgency = function (
-  marketObj,
-  agencyId,
-  amount
-) {};
-
-// decrementOrIncrementCreditOfAgency
-// @param {string} - agencyId
-// @param {number} - amount - negative or positive amount
-// @return {number} - agencyCash
-const decrementOrIncrementCreditOfAgency = function (
-  marketObj,
-  agencyId,
-  amount
-) {};
-
-// setAmountOfCarsToBuyToAllAgency's
-// set a new property amountOfCars to all agency's, that represent the amount of cars available in the agency.
-// @return {objects[]} - sellers - array of all agency's
-const setAmountOfCarsToBuyToAllAgency = function (carMarket) {};
-
-// setCarToCostumer
-// @param {string} - costumerId
-// @param {object} - carObject
-// @return {object[]} - allCarsOfCostumer
-const setCarToCostumer = function (marketObj, customerId, carObj) {};
-
-// deleteCarOfCostumer
-// @param {string} - costumerId
-// @param {string} - carId
-// @return {object[]} - allCarsOfCostumer
-const deleteCarOfCostumer = function (marketObj, customerId, carId) {};
-
-// decrementOrIncrementCashOfCostumer
-// @param {string} - costumerId
-// @param {number} - amount - negative or positive amount
-// @return {number} - costumerCash
-const decrementOrIncrementCashOfCostumer = function (
-  marketObj,
-  customerId,
-  amount
-) {};
-
-//   sortAndFilterByYearOfProduction
-//   filter and Sort in a Ascending or Descending order all vehicles for sale by year of production.
-//   @param {object[]} - arrOfCars - array of cars
-//   @param {number} - fromYear - Will display vehicles starting this year
-//   @param {number} - toYear - Will display vehicles up to this year
-//   @param {boolean} - isAscendingOrder - true for ascending order, false for descending order
-//   @return {object[]} - arrayOfModels - array of sorted cars
-const sortAndFilterByYearOfProduction = function (
-  carArray,
-  fromYear,
-  toYear,
-  isAscendingOrder
-) {};
-
-//   sortAndFilterByPrice
-//   filter and Sort in a Ascending or Descending order all vehicles for sale by price of the cars.
-//   @param {object[]} - arrOfCars - array of cars
-//   @param {number} - fromPrice - Will display vehicles starting at this price
-//   @param {number} - fromPrice - Will display vehicles up to this price
-//   @param {boolean} - isAscendingOrder - true for ascending order, false for descending order
-//   @return {object[]} - arrayOfModels - array of sorted cars
-const sortAndFilterByPrice = function (
-  carArray,
-  fromPrice,
-  toPrice,
-  isAscendingOrder
-) {};
-
-//   searchCar
-//   @param {object[]} - arrOfCars - array of cars
-//   @param {number} - fromYear - Will display vehicles starting this year
-//   @param {number} - toYear - Will display vehicles up to this year
-//   @param {number} - fromPrice - Will display vehicles starting at this price
-//   @param {number} - fromPrice - Will display vehicles up to this price
-//   optional @param {string} - brand - Look only for cars of this brand
-const searchCar = function (
-  carArray,
-  fromYear,
-  toYear,
-  fromPrice,
-  toPrice,
-  brand
-) {};
-
-//   Sell ​​a car to a specific customer
-//   @param {string} - agencyId
-//   @param {string} - customerId
-//   @param {string} - carModel
-//   @return {object} - The object of the car purchased by the customer or an explanation message
-
-//      Instructions for handling taxes:
-//      - a. Subtract the vehicle amount + 17% (tax) from the customer's cash.
-//      - b. Add the vehicle value to the car agency cash.
-//      - c. Change the car owner's id to the customer's id.
-//      - d. Remove the car from the array of the agency's car models.
-//      - e. Add the car to the client cars array.
+// ***Logging CarAgencyManager method results for testing***
 //
-//      Taxes Authority:
-//      - f. Pay 17 percent of the vehicle value to the tax authority. (add the amount to totalTaxesPaid)
-//      - g. Increase the number of transactions made in one (numberOfTransactions)
-//      - h. Add the vehicle amount + tax to sumOfAllTransactions
-//     - Check that there is the requested vehicle at the agency in not return 'The vehicle does not exist at the agency'
-//     - Check that the customer has enough money to purchase the vehicle, if not return 'The customer does not have enough money'
-const sellCar = function (marketObj, agencyId, customerId, carModel) {};
+// console.log(CarAgencyManager.getTotalAgencyRevenue('Plyq5M5AZ'));
+// console.log(CarAgencyManager.searchAgency("CarMax"));
+// console.log(CarAgencyManager.getAllAgencies());
+console.log(CarAgencyManager.removeCarFromAgency('Plyq5M5AZ', "AZJZ4"));
+// 
+// 
+// 
+const newCar = {
+  brand: "Ford",
+  models: [
+    {
+      name: "Mustang",
+      year: 2023,
+      price: 500000,
+      carNumber: "ABC123",
+      ownerId: "xyz",
+    },
+  ],
+};
+
+// console.log(CarAgencyManager.addCarToAgency("Plyq5M5AZ", newCar));
+console.log(CarAgencyManager.removeCarFromAgency("Plyq5M5AZ", "AZJZ4"));
+
+const CustomerManager = {
+  customers,
+
+  // Search for a customer by their name or ID.
+  // @param {string} idOrName - ID or name of the customer
+  // @return {object} - customer object if found, otherwise null
+  searchCustomer: function (idOrName) {},
+
+  // Retrieve all customers' names.
+  // @return {string[]} - Array of customer names
+  getAllCustomers: function () {},
+
+  // Change the cash of a customer.
+  // @param {string} customerId - The ID of the customer
+  // @param {number} cash - The new cash value
+  // @return {boolean} - true if updated successfully, false otherwise
+  changeCustomerCash: function (customerId, cash) {},
+
+  // Calculate the total value of all cars owned by a specific customer.
+  // @param {string} customerId - The ID of the customer
+  // @return {number} - The total value of cars owned by the customer
+  getCustomerTotalCarValue: function (customerId) {},
+};
+
+const CarManager = {
+  cars: agencies.flatMap((agency) => agency.cars),
+
+  // Retrieve all cars available for purchase.
+  // @return {object[]} - Array of cars
+  getAllCars: function () {},
+
+  // Search for cars based on certain criteria.
+  // @param {number} year - The production year of the car
+  // @param {number} price - The price of the car
+  // @param {string} brand - The brand of the car
+  // @return {object[]} - Array of cars that meet the criteria
+  searchCars: function (year, price, brand) {},
+
+  // Return the most expensive car available for sale.
+  // @return {object} - The most expensive car
+  getMostExpensiveCar: function () {},
+
+  // Return the cheapest car available for sale.
+  // @return {object} - The cheapest car
+  getCheapestCar: function () {},
+};
+
+const CarPurchaseManager = {
+  agencies,
+  customers,
+  taxesAuthority: {
+    totalTaxesPaid: 0,
+    sumOfAllTransactions: 0,
+    numberOfTransactions: 0,
+  },
+
+  // Implement a sellCar function that sells a car to a specific customer.
+  // @param {string} carId - The ID of the car
+  // @param {string} customerId - The ID of the customer
+  // @return {boolean} - true if the car was sold successfully, false otherwise
+  sellCar: function (carId, customerId) {},
+
+  // Calculate and return the total revenue of the entire market.
+  // @return {number} - The total revenue of the market
+  getTotalMarketRevenue: function () {},
+};

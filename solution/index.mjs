@@ -4,6 +4,10 @@ import { customers } from "../data/customers.mjs";
 const CarAgencyManager = {
   agencies,
 
+  agencyById: function (agencyId) {
+    return agencies.find((agency) => agency.agencyId === agencyId);
+  },
+
   // Search for a car agency by its name or ID.
   // @param {string} idOrName - ID or name of the agency
   // @return {object} - agency object if found, otherwise null
@@ -27,7 +31,7 @@ const CarAgencyManager = {
   // @param {object} car - The car object to be added
   // @return {boolean} - true if added successfully, false otherwise
   addCarToAgency: function (agencyId, car) {
-    const agency = agencies.find((agency) => agency.agencyId === agencyId);
+    const agency = this.agencyById(agencyId);
     if (!agency) {
       return false;
     }
@@ -49,7 +53,7 @@ const CarAgencyManager = {
   // @param {string} carId - The ID of the car to be removed
   // @return {boolean} - true if removed successfully, false otherwise
   removeCarFromAgency: function (agencyId, carId) {
-    const agency = agencies.find((agency) => agency.agencyId === agencyId);
+    const agency = this.agencyById(agencyId);
     if (!agency) {
       return false;
     }
@@ -72,9 +76,7 @@ const CarAgencyManager = {
   // @param {string} agencyId - The ID of the agency
   // @param {number} cashOrCredit - The amount of cash or credit to be updated
   // @return {boolean} - true if updated successfully, false otherwise
-  changeAgencyCashOrCredit: function (agencyId, cashOrCredit) {
-
-  },
+  changeAgencyCashOrCredit: function (agencyId, cashOrCredit) {},
 
   // Update the price of a specific car in an agency.
   // @param {string} agencyId - The ID of the agency
@@ -82,15 +84,32 @@ const CarAgencyManager = {
   // @param {number} newPrice - The new price of the car
   // @return {boolean} - true if updated successfully, false otherwise
   updateCarPrice: function (agencyId, carId, newPrice) {
-    
+    const agency = this.agencyById(agencyId);
+    if (!agency) {
+      return false;
+    }
+    for (let brand of agency.cars) {
+      for (let car of brand.models) {
+        if (car.carNumber === carId) {
+          car.price = newPrice;
+          return true;
+        }
+      }
+    }
   },
 
   // Calculate and return the total revenue for a specific agency.
   // @param {string} agencyId - The ID of the agency
   // @return {number} - The total revenue of the agency
   getTotalAgencyRevenue: function (agencyId) {
-    const agency = agencies.find((agency) => agency.agencyId === agencyId);
-    return agency.cash + agency.credit;
+    const agency = this.agencyById(agencyId);
+    let totalRevenue = 0;
+    for (let brand of agency.cars) {
+      for (let car of brand.models) {
+        totalRevenue += car.price;
+      }
+    }
+    return totalRevenue;
   },
 
   // Transfer a car from one agency to another.
@@ -98,7 +117,39 @@ const CarAgencyManager = {
   // @param {string} toAgencyId - The ID of the agency to where the car will be transferred
   // @param {string} carId - The ID of the car to be transferred
   // @return {boolean} - true if transferred successfully, false otherwise
-  transferCarBetweenAgencies: function (fromAgencyId, toAgencyId, carId) {},
+  transferCarBetweenAgencies: function (fromAgencyId, toAgencyId, carId) {
+    const fromAgency = this.agencyById(fromAgencyId);
+    const toAgency = this.agencyById(toAgencyId);
+    let carToTransfer;
+    if (!fromAgency || !toAgency) {
+      return false;
+    }
+    for (let brand of fromAgency.cars) {
+      for (let car of brand.models) {
+        if (car.carNumber === carId) {
+          carToTransfer = car;
+          brand.models.splice(brand.models.indexOf(car), 1);
+        }
+      }
+    }
+    if (!carToTransfer) {
+      return false;
+    } else {
+      const existingBrand = toAgency.cars.find(
+        (c) => c.brand === carToTransfer.brand
+      );
+      if (!existingBrand) {
+        const newBrand = {
+          brand: carToTransfer.brand,
+          models: [carToTransfer],
+        };
+        toAgency.cars.push(newBrand);
+      } else {
+        existingBrand.models.push(carToTransfer);
+      }
+    }
+    return true;
+  },
 };
 
 // ***Logging CarAgencyManager method results for testing***
@@ -106,10 +157,11 @@ const CarAgencyManager = {
 // console.log(CarAgencyManager.getTotalAgencyRevenue('Plyq5M5AZ'));
 // console.log(CarAgencyManager.searchAgency("CarMax"));
 // console.log(CarAgencyManager.getAllAgencies());
-console.log(CarAgencyManager.removeCarFromAgency('Plyq5M5AZ', "AZJZ4"));
-// 
-// 
-// 
+// console.log(CarAgencyManager.removeCarFromAgency("Plyq5M5AZ", "AZJZ4"));
+// console.log(CarAgencyManager.getTotalAgencyRevenue('Plyq5M5AZ'));
+//
+//
+//
 const newCar = {
   brand: "Ford",
   models: [
